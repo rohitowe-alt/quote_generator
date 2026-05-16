@@ -14,7 +14,7 @@
 import streamlit as st
 from openai import OpenAI
 import os
-
+from dotenv import load_dotenv
 
 # ── SECTION 2 : PAGE CONFIGURATION ───────────────────────────
 # Must be the very first Streamlit call in the script.
@@ -170,7 +170,7 @@ def get_openai_client() -> OpenAI:
     Tries Streamlit Secrets first, then falls back to the
     OPENAI_API_KEY environment variable.
     """
-    api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("OPENAI_API_KEY")
 
     if not api_key:
         st.error(
@@ -205,11 +205,9 @@ def generate_quote(word: str, client: OpenAI) -> str:
 
     # System prompt — defines the AI's persona and constraints
     system_prompt = (
-        "You are a thoughtful, uplifting quote writer. "
-        "Your quotes are warm, concise (1–2 sentences), and feel "
+        "You are a thoughtful, uplifting quote collector. "
         "genuinely human — never generic or clichéd. "
-        "You always incorporate the given word naturally and meaningfully. "
-        "Return ONLY the quote text, no attribution, no quotation marks, "
+        "Return ONLY the quote text and attribution, no quotation marks, "
         "no preamble."
     )
 
@@ -225,9 +223,8 @@ def generate_quote(word: str, client: OpenAI) -> str:
     # temperature: 0.85 gives creative variety without going off-rails
 
     response = client.responses.create(
-        model="gpt-5-nano",          # ← latest OpenAI model
-        max_output_tokens=80,
-        temperature=0.85,
+        model="gpt-5-mini",          # ← latest OpenAI model
+        max_output_tokens=800,
         input=[
             {"role": "system", "content": system_prompt},
             {"role": "user",   "content": user_prompt},
